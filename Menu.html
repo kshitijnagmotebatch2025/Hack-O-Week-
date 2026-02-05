@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Local Bistro - Menu</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Georgia', serif; /* Serif fonts often look more like traditional menus */
+            background-color: #fdfbf7; /* Slight off-white paper color */
+            color: #333;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 15px rgba(0,0,0,0.05);
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        .tagline {
+            font-style: italic;
+            color: #7f8c8d;
+        }
+
+        /* Menu Categories */
+        h2 {
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #e74c3c; /* Accent color */
+            margin-top: 40px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        /* Menu Items */
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dotted #ccc;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-details {
+            max-width: 80%;
+        }
+
+        .item-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: block;
+        }
+
+        .item-desc {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .item-price {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .container { padding: 10px; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>The Local Bistro</h1>
+            <p class="tagline">Fresh Ingredients. Local Taste.</p>
+        </header>
+
+        <section>
+            <h2>Starters</h2>
+            
+            <div class="menu-item">
+                <div class="item-details">
+                    <span class="item-name">Garlic Butter Bruschetta</span>
+                    <div class="item-desc">Toasted sourdough topped with tomatoes, basil, and fresh mozzarella.</div>
+                </div>
+                <div class="item-price">$8.00</div>
+            </div>
+
+            <div class="menu-item">
+                <div class="item-details">
+                    <span class="item-name">Soup of the Day</span>
+                    <div class="item-desc">Ask your server about our fresh daily selection. Served with a roll.</div>
+                </div>
+                <div class="item-price">$6.50</div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Main Courses</h2>
+
+            <div class="menu-item">
+                <div class="item-details">
+                    <span class="item-name">Classic Cheeseburger</span>
+                    <div class="item-desc">100% Angus beef, cheddar cheese, lettuce, tomato, and house sauce.</div>
+                </div>
+                <div class="item-price">$14.00</div>
+            </div>
+
+            <div class="menu-item">
+                <div class="item-details">
+                    <span class="item-name">Grilled Salmon</span>
+                    <div class="item-desc">Atlantic salmon served with quinoa salad and roasted asparagus.</div>
+                </div>
+                <div class="item-price">$19.50</div>
+            </div>
+
+            <div class="menu-item">
+                <div class="item-details">
+                    <span class="item-name">Vegetable Pasta</span>
+                    <div class="item-desc">Penne pasta tossed in marinara sauce with seasonal roasted vegetables.</div>
+                </div>
+                <div class="item-price">$12.00</div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Beverages</h2>
+            
+            <div class="menu-item">
+                <div class="item-details">
+                    <span class="item-name">Craft Lemonade</span>
+                </div>
+                <div class="item-price">$4.00</div>
+            </div>
+
+            <div class="menu-item">
+                <div class="item-details">
+                    <span class="item-name">Iced Coffee</span>
+                </div>
+                <div class="item-price">$3.50</div>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2026 The Local Bistro. Open Daily 10am - 10pm.</p>
+        </footer>
+    </div>
+
+</body>
+</html>
