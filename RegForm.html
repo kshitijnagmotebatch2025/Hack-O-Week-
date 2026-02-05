@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechFest 2026 Registration</title>
+    <style>
+        /* Modern Tech Theme Styles */
+        :root {
+            --primary-color: #2563eb; /* Tech Blue */
+            --accent-color: #0f172a; /* Dark Navy */
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--accent-color);
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        p.subtitle {
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        /* Form Layout */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box; /* Ensures padding doesn't break width */
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        /* Checkbox Group for Events */
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two columns */
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 10px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-item input {
+            margin-right: 10px;
+            accent-color: var(--primary-color);
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Submit Button */
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn-submit:hover {
+            background-color: #1d4ed8;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 500px) {
+            .container { padding: 20px; }
+            .checkbox-group { grid-template-columns: 1fr; } /* Stack vertically on phone */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>TechFest 2026</h1>
+            <p class="subtitle">Join the Innovation. Register Below.</p>
+        </header>
+
+        <form action="#" method="POST">
+            
+            <div class="form-group">
+                <label for="fullname">Full Name</label>
+                <input type="text" id="fullname" name="fullname" placeholder="John Doe" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">College Email</label>
+                <input type="email" id="email" name="email" placeholder="john@university.edu" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" placeholder="123-456-7890">
+            </div>
+
+            <div class="form-group">
+                <label for="college">College / University Name</label>
+                <input type="text" id="college" name="college" required>
+            </div>
+
+            <div class="form-group">
+                <label for="year">Year of Study</label>
+                <select id="year" name="year">
+                    <option value="" disabled selected>Select your year</option>
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Select Events to Participate:</label>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="coding" name="events" value="coding_marathon">
+                        <label for="coding" style="margin:0; font-weight:normal;">Coding Marathon</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="robotics" name="events" value="robotics">
+                        <label for="robotics" style="margin:0; font-weight:normal;">Robo Wars</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="gaming" name="events" value="gaming">
+                        <label for="gaming" style="margin:0; font-weight:normal;">LAN Gaming</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="quiz" name="events" value="tech_quiz">
+                        <label for="quiz" style="margin:0; font-weight:normal;">Tech Quiz</label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">Complete Registration</button>
+        </form>
+    </div>
+
+</body>
+</html>
