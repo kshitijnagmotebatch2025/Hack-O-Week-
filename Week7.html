@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WANDERLUST | Expedition Log</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Manrope:wght@300;500;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- 1. CSS VARIABLES & RESET --- */
+        :root {
+            --dark: #0f172a; /* Slate Black */
+            --gold: #38bdf8; /* Neon Sky Blue */
+            --white: #f8fafc; /* Crisp White */
+            --ease: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+        body {
+            background-color: var(--dark);
+            color: var(--white);
+            font-family: 'Manrope', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- 2. CUSTOM MAGNETIC CURSOR --- */
+        .cursor {
+            width: 20px; height: 20px;
+            border: 1px solid var(--white);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, background-color 0.3s;
+            mix-blend-mode: difference;
+        }
+        .cursor.hovered { background-color: var(--white); width: 50px; height: 50px; opacity: 0.5; border: none; }
+
+        /* --- 3. BACKGROUND & HERO --- */
+        .app-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100vh;
+            background: url('https://images.unsplash.com/photo-1455380579765-810023662ea2?auto=format&fit=crop&w=1920&q=80') no-repeat center/cover;
+            filter: brightness(0.2) grayscale(0.5);
+            z-index: -1;
+        }
+
+        header {
+            text-align: center;
+            padding: 8vh 5vw 4vh;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        /* --- 4. TO-DO APP CONTAINER --- */
+        .todo-container {
+            max-width: 700px;
+            width: 90%;
+            margin: 0 auto 10vh;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            border-radius: 12px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        /* --- Input Section --- */
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            color: var(--white);
+            font-family: 'Manrope', sans-serif;
+            font-size: 1.2rem;
+            padding: 0.5rem 0;
+            outline: none;
+            transition: border-color 0.3s var(--ease);
+        }
+
+        input[type="text"]:focus {
+            border-bottom-color: var(--gold);
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .add-btn {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 0.8rem 2rem;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s var(--ease);
+        }
+
+        .add-btn:hover {
+            background: var(--gold);
+            color: var(--dark);
+        }
+
+        /* --- Task List Section --- */
+        .task-list {
+            list-style: none;
+            max-height: 50vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* Custom Scrollbar for task list */
+        .task-list::-webkit-scrollbar { width: 4px; }
+        .task-list::-webkit-scrollbar-track { background: transparent; }
+        .task-list::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 4px; }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.2rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s var(--ease);
+            animation: slideIn 0.4s var(--ease) forwards;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .task-content {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .task-text {
+            font-size: 1.1rem;
+            transition: all 0.3s;
+        }
+
+        /* Custom Checkbox */
+        .check-btn {
+            width: 24px;
+            height: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .check-btn:hover {
+            border-color: var(--gold);
+        }
+
+        .check-btn svg {
+            width: 14px;
+            height: 14px;
+            color: var(--dark);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        /* Completed State */
+        .task-item.completed .check-btn {
+            background: var(--gold);
+            border-color: var(--gold);
+        }
+
+        .task-item.completed .check-btn svg {
+            opacity: 1;
+        }
+
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            opacity: 0.4;
+        }
+
+        /* Delete Button */
+        .delete-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 1.2rem;
+            transition: color 0.3s;
+            padding: 0.5rem;
+        }
+
+        .delete-btn:hover {
+            color: #ff4c4c;
+        }
+
+        .empty-state {
+            text-align: center;
+            opacity: 0.5;
+            font-style: italic;
+            padding: 2rem 0;
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            padding: 2rem;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            color: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cursor" id="cursor"></div>
+    <div class="app-bg"></div>
+
+    <header>
+        <h1>Expedition Log</h1>
+        <div class="subtitle">Daily Itinerary & Tasks</div>
+    </header>
+
+    <main class="todo-container">
+        <div class="input-group">
+            <input type="text" id="taskInput" placeholder="Chart a new course... (Add a task)">
+            <button class="add-btn" id="addBtn">Log Entry</button>
+        </div>
+
+        <ul class="task-list" id="taskList">
+            </ul>
+    </main>
+
+    <footer>
+        <p>Your journey, recorded.</p>
+    </footer>
+
+    <script>
+    // --- DOM Elements ---
+    const taskInput = document.getElementById('taskInput');
+    const addBtn = document.getElementById('addBtn');
+    const taskList = document.getElementById('taskList');
+    
+    // --- State Management ---
+    let tasks = JSON.parse(localStorage.getItem('wanderlustTasks')) || [];
+
+    // --- Core Functions ---
+    function renderTasks() {
+        taskList.innerHTML = ''; 
+
+        if (tasks.length === 0) {
+            taskList.innerHTML = `<li class="empty-state">Your itinerary is clear. Ready for the next adventure.</li>`;
+            return;
+        }
+
+        tasks.forEach((task, index) => {
+            const li = document.createElement('li');
+            li.className = `task-item ${task.completed ? 'completed' : ''}`;
+            
+            li.innerHTML = `
+                <div class="task-content">
+                    <button class="check-btn" onclick="toggleTask(${index})">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </button>
+                    <span class="task-text">${task.text}</span>
+                </div>
+                <button class="delete-btn" onclick="deleteTask(${index})">✕</button>
+            `;
+            taskList.appendChild(li);
+        });
+    }
+
+    function addTask() {
+        const text = taskInput.value.trim();
+        if (text === '') return;
+
+        tasks.push({ text: text, completed: false });
+        saveData();
+        taskInput.value = '';
+        renderTasks();
+    }
+
+    function toggleTask(index) {
+        tasks[index].completed = !tasks[index].completed;
+        saveData();
+        renderTasks();
+    }
+
+    function deleteTask(index) {
+        tasks.splice(index, 1);
+        saveData();
+        renderTasks();
+    }
+
+    function saveData() {
+        localStorage.setItem('wanderlustTasks', JSON.stringify(tasks));
+    }
+
+    // --- Event Listeners ---
+    addBtn.addEventListener('click', addTask);
+    
+    taskInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            addTask();
+        }
+    });
+
+    // --- CLEANED CUSTOM CURSOR LOGIC ---
+    const cursor = document.getElementById('cursor');
+    
+    document.addEventListener('mousemove', (e) => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+    });
+
+    // Use Event Delegation to handle hovering over any current or future buttons
+    document.addEventListener('mouseover', (e) => {
+        if (e.target.closest('a, button, input, .check-btn, .delete-btn')) {
+            cursor.classList.add('hovered');
+        }
+    });
+
+    document.addEventListener('mouseout', (e) => {
+        if (e.target.closest('a, button, input, .check-btn, .delete-btn')) {
+            cursor.classList.remove('hovered');
+        }
+    });
+
+    // --- Initialization ---
+    renderTasks();
+</script>
+</body>
+</html>
