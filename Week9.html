@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATMOSPHERE | Global Weather</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Manrope:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- 1. MIDNIGHT GLASS COLOR SCHEME --- */
+        :root {
+            --bg-base: #080c14; /* Deep Midnight Blue */
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-warm: #fde047; /* Sun yellow */
+            --accent-cool: #60a5fa; /* Rain blue */
+            --accent-cloud: #cbd5e1; /* Cloud gray */
+            --ease: cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Manrope', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* --- 2. DYNAMIC BACKGROUND --- */
+        .ambient-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            /* A subtle gradient mesh for a moody sky effect */
+            background: radial-gradient(circle at 20% 30%, rgba(14, 24, 46, 1) 0%, var(--bg-base) 50%),
+                        radial-gradient(circle at 80% 80%, rgba(20, 30, 50, 1) 0%, var(--bg-base) 50%);
+            z-index: -1;
+        }
+
+        /* --- 3. CUSTOM MAGNETIC CURSOR --- */
+        .cursor {
+            width: 20px; height: 20px;
+            border: 1px solid var(--text-main);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, background-color 0.3s, border-color 0.3s;
+            mix-blend-mode: difference;
+        }
+        .cursor.hovered { 
+            background-color: var(--text-main); 
+            border-color: var(--text-main);
+            width: 50px; height: 50px; 
+            opacity: 0.5; 
+            mix-blend-mode: normal;
+        }
+
+        /* --- 4. HEADER --- */
+        header {
+            text-align: center;
+            padding: 8vh 5vw 4vh;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            letter-spacing: 3px;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        /* --- 5. WEATHER PANELS (GLASSMORPHISM) --- */
+        .weather-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 5vw 10vh;
+        }
+
+        .panel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .weather-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: transform 0.5s var(--ease), background 0.5s var(--ease), border-color 0.5s var(--ease);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .weather-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Subtle glowing orb behind each card based on weather */
+        .weather-card::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: 50%;
+            transform: translateX(-50%);
+            width: 150px; height: 150px;
+            border-radius: 50%;
+            filter: blur(60px);
+            z-index: -1;
+            opacity: 0.3;
+            transition: opacity 0.5s;
+        }
+        .weather-card:hover::before { opacity: 0.6; }
+        
+        /* City specific glow colors */
+        .card-tokyo::before { background: var(--accent-warm); }
+        .card-london::before { background: var(--accent-cool); }
+        .card-newyork::before { background: var(--accent-cloud); }
+
+        .city-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .country-name {
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .weather-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+        }
+
+        .temperature {
+            font-size: 4.5rem;
+            font-weight: 300;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .condition {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+        
+        /* Weather condition colors */
+        .text-warm { color: var(--accent-warm); }
+        .text-cool { color: var(--accent-cool); }
+        .text-cloud { color: var(--accent-cloud); }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            border-top: 1px solid var(--glass-border);
+            padding-top: 1.5rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="cursor" id="cursor"></div>
+    <div class="ambient-bg"></div>
+
+    <header>
+        <h1>Atmosphere</h1>
+        <div class="subtitle">Current Conditions • Static Log</div>
+    </header>
+
+    <main class="weather-container">
+        <div class="panel-grid" id="weatherGrid">
+            </div>
+    </main>
+
+    <script>
+        // --- 1. STATIC WEATHER DATA (No API) ---
+        const weatherData = [
+            {
+                id: "tokyo",
+                city: "Tokyo",
+                country: "Japan",
+                temp: "24°C",
+                condition: "Clear Sky",
+                humidity: "45%",
+                wind: "12 km/h",
+                colorClass: "text-warm",
+                // SVG Sun Icon
+                icon: `<svg class="weather-icon text-warm" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>`
+            },
+            {
+                id: "london",
+                city: "London",
+                country: "UK",
+                temp: "12°C",
+                condition: "Light Rain",
+                humidity: "82%",
+                wind: "18 km/h",
+                colorClass: "text-cool",
+                // SVG Rain Cloud Icon
+                icon: `<svg class="weather-icon text-cool" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 14v2m-4-2v2m8-2v2M3 16.5a4.5 4.5 0 018.1-2.5 5 5 0 018.8 2.5H3z"></path></svg>`
+            },
+            {
+                id: "newyork",
+                city: "New York",
+                country: "USA",
+                temp: "18°C",
+                condition: "Partly Cloudy",
+                humidity: "60%",
+                wind: "22 km/h",
+                colorClass: "text-cloud",
+                // SVG Cloud Icon
+                icon: `<svg class="weather-icon text-cloud" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 15.5a4.5 4.5 0 018.1-2.5 5 5 0 018.8 2.5H3z"></path></svg>`
+            }
+        ];
+
+        // --- 2. RENDER WEATHER CARDS ---
+        const weatherGrid = document.getElementById('weatherGrid');
+
+        weatherData.forEach(data => {
+            const card = document.createElement('div');
+            // Add identifying class for specific CSS glow effect
+            card.className = `weather-card card-${data.id}`;
+            
+            card.innerHTML = `
+                <div class="city-name">${data.city}</div>
+                <div class="country-name">${data.country}</div>
+                
+                ${data.icon}
+                
+                <div class="temperature">${data.temp}</div>
+                <div class="condition ${data.colorClass}">${data.condition}</div>
+                
+                <div class="details-grid">
+                    <div class="detail-item">
+                        <span class="detail-label">Humidity</span>
+                        <span class="detail-value">${data.humidity}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Wind</span>
+                        <span class="detail-value">${data.wind}</span>
+                    </div>
+                </div>
+            `;
+            weatherGrid.appendChild(card);
+        });
+
+        // --- 3. CURSOR LOGIC ---
+        const cursor = document.getElementById('cursor');
+        
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        // Hover effect for the cards
+        document.addEventListener('mouseover', (e) => {
+            if (e.target.closest('.weather-card')) {
+                cursor.classList.add('hovered');
+            }
+        });
+
+        document.addEventListener('mouseout', (e) => {
+            if (e.target.closest('.weather-card')) {
+                cursor.classList.remove('hovered');
+            }
+        });
+    </script>
+</body>
+</html>

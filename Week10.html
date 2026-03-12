@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Dev Bootcamp | Dual Experience</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Inter:wght@300;500;800&family=Merriweather:wght@400;700;900&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        // Page 1 Fonts (Cyber/Tech)
+                        'tech-sans': ['Inter', 'sans-serif'],
+                        'tech-mono': ['Fira Code', 'monospace'],
+                        // Page 2 Fonts (Academic)
+                        'acad-sans': ['Open Sans', 'sans-serif'],
+                        'acad-serif': ['Merriweather', 'serif']
+                    },
+                    colors: {
+                        cyber: '#06b6d4',
+                        darkbg: '#0f172a',
+                        brand: '#4f46e5'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="antialiased overflow-x-hidden selection:bg-cyan-500 selection:text-white">
+
+    <div id="page1" class="block bg-darkbg text-gray-300 font-tech-sans min-h-screen">
+        
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center border-b border-gray-800">
+            <div class="text-2xl font-tech-mono font-bold text-white"><span class="text-cyber">&lt;</span>CodeForge<span class="text-cyber">/&gt;</span></div>
+            <button class="border border-cyber text-cyber hover:bg-cyber hover:text-darkbg transition-all px-6 py-2 rounded-sm font-tech-mono text-sm uppercase tracking-wider">Apply Now</button>
+        </nav>
+
+        <header class="container mx-auto px-6 py-20 md:py-32 flex flex-col md:flex-row items-center gap-12">
+            <div class="md:w-1/2">
+                <div class="inline-block bg-gray-800 text-cyber font-tech-mono px-3 py-1 rounded text-sm mb-6">12-Week Intensive Bootcamp</div>
+                <h1 class="text-5xl md:text-7xl font-extrabold text-white leading-tight mb-6">
+                    Zero to <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">Full-Stack.</span>
+                </h1>
+                <p class="text-lg text-gray-400 mb-10 max-w-lg">
+                    Master modern web development. Build real-world applications using React, Node.js, and MongoDB. Launch your tech career in just 12 weeks.
+                </p>
+                <div class="flex gap-4">
+                    <button class="bg-cyan-500 hover:bg-cyan-400 text-slate-900 font-bold px-8 py-4 rounded transition-colors">Start Journey</button>
+                    <button class="bg-gray-800 hover:bg-gray-700 text-white font-bold px-8 py-4 rounded transition-colors">View Syllabus</button>
+                </div>
+            </div>
+            <div class="md:w-1/2 relative">
+                <div class="absolute inset-0 bg-cyan-500 blur-[100px] opacity-20 rounded-full"></div>
+                <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80" alt="Coding Setup" class="relative z-10 rounded-xl border border-gray-700 shadow-2xl">
+            </div>
+        </header>
+
+        <section class="bg-gray-900 py-20 border-t border-gray-800">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-white mb-12 text-center">What You'll Master</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-gray-800 p-8 rounded-lg border border-gray-700 hover:border-cyber transition-colors">
+                        <div class="text-cyber font-tech-mono text-xl mb-4">01. Frontend</div>
+                        <h3 class="text-2xl font-bold text-white mb-3">UI/UX & React</h3>
+                        <p class="text-gray-400">Build highly interactive, component-driven user interfaces using modern React, Tailwind CSS, and Next.js.</p>
+                    </div>
+                    <div class="bg-gray-800 p-8 rounded-lg border border-gray-700 hover:border-cyber transition-colors">
+                        <div class="text-cyber font-tech-mono text-xl mb-4">02. Backend</div>
+                        <h3 class="text-2xl font-bold text-white mb-3">Node & Express</h3>
+                        <p class="text-gray-400">Architect robust APIs, manage server logic, and handle user authentication with JWT.</p>
+                    </div>
+                    <div class="bg-gray-800 p-8 rounded-lg border border-gray-700 hover:border-cyber transition-colors">
+                        <div class="text-cyber font-tech-mono text-xl mb-4">03. Database</div>
+                        <h3 class="text-2xl font-bold text-white mb-3">MongoDB & SQL</h3>
+                        <p class="text-gray-400">Master data modeling. Learn both NoSQL (MongoDB) and relational databases (PostgreSQL).</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <footer class="text-center py-10 border-t border-gray-800 text-gray-500 font-tech-mono text-sm">
+            &copy; 2026 CodeForge Academy.
+        </footer>
+    </div>
+
+
+    <div id="page2" class="hidden bg-slate-50 text-slate-800 font-acad-sans min-h-screen">
+        
+        <nav class="bg-white shadow-sm">
+            <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-brand rounded-sm flex items-center justify-center text-white font-bold font-acad-serif">P</div>
+                    <div class="text-xl font-acad-serif font-bold text-slate-900">Pinnacle Institute</div>
+                </div>
+                <button class="bg-brand hover:bg-indigo-700 text-white transition-colors px-6 py-2 rounded-full font-semibold text-sm">Enroll Now</button>
+            </div>
+        </nav>
+
+        <header class="container mx-auto px-6 py-20 flex flex-col-reverse md:flex-row items-center gap-12">
+            <div class="md:w-1/2">
+                <span class="text-brand font-bold tracking-widest uppercase text-sm mb-4 block">Professional Certificate Program</span>
+                <h1 class="text-4xl md:text-6xl font-acad-serif font-black text-slate-900 leading-tight mb-6">
+                    Build the Web. <br>Build Your Career.
+                </h1>
+                <p class="text-lg text-slate-600 mb-8 max-w-lg leading-relaxed">
+                    Join our intensive 24-week Web Development Boot Camp. Gain the technical skills, portfolio, and career coaching needed to succeed.
+                </p>
+                <div class="flex gap-4">
+                    <button class="bg-brand hover:bg-indigo-700 text-white font-semibold px-8 py-4 rounded shadow-lg shadow-indigo-200 transition-all">Get Syllabus</button>
+                    <button class="bg-white hover:bg-slate-100 text-slate-900 border border-slate-300 font-semibold px-8 py-4 rounded transition-all">Admissions</button>
+                </div>
+            </div>
+            <div class="md:w-1/2">
+                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80" alt="Students" class="rounded-2xl shadow-2xl object-cover">
+            </div>
+        </header>
+
+        <section class="bg-white py-16 border-y border-slate-200">
+            <div class="container mx-auto px-6 text-center">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                    <div>
+                        <div class="text-4xl font-acad-serif font-bold text-brand mb-2">92%</div>
+                        <div class="text-slate-500 font-semibold text-sm uppercase tracking-wide">Hired in 6 months</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-acad-serif font-bold text-brand mb-2">24</div>
+                        <div class="text-slate-500 font-semibold text-sm uppercase tracking-wide">Weeks Long</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-acad-serif font-bold text-brand mb-2">1:1</div>
+                        <div class="text-slate-500 font-semibold text-sm uppercase tracking-wide">Mentorship</div>
+                    </div>
+                    <div>
+                        <div class="text-4xl font-acad-serif font-bold text-brand mb-2">5+</div>
+                        <div class="text-slate-500 font-semibold text-sm uppercase tracking-wide">Projects</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="bg-slate-900 text-slate-400 py-12 mt-12">
+            <div class="container mx-auto px-6 text-center">
+                <p class="text-sm">&copy; 2026 Pinnacle Institute. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <button onclick="togglePage()" class="fixed bottom-6 right-6 bg-white border-2 border-slate-900 text-slate-900 shadow-2xl px-6 py-3 rounded-full font-bold flex items-center gap-2 hover:scale-105 transition-transform z-50">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+        <span id="toggleText">View Academic Page</span>
+    </button>
+
+    <script>
+        const page1 = document.getElementById('page1');
+        const page2 = document.getElementById('page2');
+        const toggleText = document.getElementById('toggleText');
+
+        function togglePage() {
+            // Check if page 1 is currently showing
+            if (page1.classList.contains('block')) {
+                // Hide Page 1, Show Page 2
+                page1.classList.replace('block', 'hidden');
+                page2.classList.replace('hidden', 'block');
+                toggleText.innerText = "View Tech Page";
+                
+                // Change selection color for academic theme
+                document.body.classList.replace('selection:bg-cyan-500', 'selection:bg-brand');
+            } else {
+                // Hide Page 2, Show Page 1
+                page2.classList.replace('block', 'hidden');
+                page1.classList.replace('hidden', 'block');
+                toggleText.innerText = "View Academic Page";
+                
+                // Change selection color back for tech theme
+                document.body.classList.replace('selection:bg-brand', 'selection:bg-cyan-500');
+            }
+            
+            // Scroll back to the top when switching pages
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>

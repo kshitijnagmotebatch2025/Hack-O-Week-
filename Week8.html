@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LENS & LIGHT | Photographer Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Manrope:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- 1. NEW COLOR SCHEME & RESET --- */
+        :root {
+            --bg-color: #0f1115; /* Deep Slate/Navy */
+            --accent: #9ca3af; /* Cool Silver */
+            --highlight: #ffffff; /* Pure White */
+            --overlay: rgba(15, 17, 21, 0.95);
+            --ease: cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--highlight);
+            font-family: 'Manrope', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* --- 2. MAGNETIC CURSOR (Tweaked for new colors) --- */
+        .cursor {
+            width: 20px; height: 20px;
+            border: 1px solid var(--accent);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, background-color 0.3s, border-color 0.3s;
+            mix-blend-mode: difference;
+        }
+        .cursor.hovered { 
+            background-color: var(--highlight); 
+            border-color: var(--highlight);
+            width: 60px; height: 60px; 
+            opacity: 0.8; 
+            mix-blend-mode: normal;
+        }
+
+        /* --- 3. HEADER UI --- */
+        header {
+            text-align: center;
+            padding: 10vh 5vw 6vh;
+            position: relative;
+        }
+
+        header::after {
+            content: '';
+            display: block;
+            width: 1px;
+            height: 60px;
+            background: var(--accent);
+            margin: 3rem auto 0;
+            opacity: 0.3;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 400;
+            letter-spacing: 4px;
+            margin-bottom: 0.5rem;
+            color: var(--highlight);
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        /* --- 4. 9-PHOTO GRID UI --- */
+        .gallery-container {
+            padding: 0 5vw 10vh;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .grid {
+            display: grid;
+            /* 3x3 Grid setup */
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .photo-card {
+            position: relative;
+            aspect-ratio: 4 / 5; /* Gives photos a nice portrait crop */
+            overflow: hidden;
+            background-color: #1a1d24;
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(40%);
+            transition: transform 0.8s var(--ease), filter 0.8s var(--ease);
+        }
+
+        .photo-card:hover img {
+            transform: scale(1.05);
+            filter: grayscale(0%);
+        }
+
+        .photo-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 50%);
+            opacity: 0;
+            display: flex;
+            align-items: flex-end;
+            padding: 2rem;
+            transition: opacity 0.5s var(--ease);
+        }
+
+        .photo-card:hover .photo-overlay {
+            opacity: 1;
+        }
+
+        .photo-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--highlight);
+        }
+
+        /* --- 5. LIGHTBOX MODAL --- */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            background: var(--overlay);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s var(--ease);
+            backdrop-filter: blur(10px);
+        }
+
+        .lightbox.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .lightbox-img {
+            max-width: 90vw;
+            max-height: 85vh;
+            object-fit: contain;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: scale(0.95);
+            transition: transform 0.4s var(--ease);
+        }
+
+        .lightbox.active .lightbox-img {
+            transform: scale(1);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            background: transparent;
+            border: none;
+            color: var(--accent);
+            font-size: 2rem;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: var(--highlight);
+        }
+
+        .lightbox-caption {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: var(--highlight);
+            letter-spacing: 2px;
+        }
+        
+        @media (min-width: 900px) {
+            .grid { grid-template-columns: repeat(3, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cursor" id="cursor"></div>
+
+    <header>
+        <h1>Lens & Light</h1>
+        <div class="subtitle">Selected Works • 2026</div>
+    </header>
+
+    <main class="gallery-container">
+        <div class="grid" id="galleryGrid"></div>
+    </main>
+
+    <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+        <button class="close-btn" id="closeBtn">✕</button>
+        <img src="" alt="Expanded photograph" class="lightbox-img" id="lightboxImg">
+        <div class="lightbox-caption" id="lightboxCaption"></div>
+    </div>
+
+    <script>
+        // --- 1. 9-PHOTO DATA ARRAY ---
+        const photos = [
+            { title: "Neon Nights", url: "https://images.unsplash.com/photo-1555448248-2571daf6344b?auto=format&fit=crop&w=1000&q=80" },
+            { title: "Alpine Silence", url: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1000&q=80" },
+            { title: "Concrete Geometry", url: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1000&q=80" },
+            { title: "Ocean's Edge", url: "https://images.unsplash.com/photo-1439405326854-014607f694d7?auto=format&fit=crop&w=1000&q=80" },
+            { title: "Desert Shadows", url: "https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?auto=format&fit=crop&w=1000&q=80" },
+            { title: "Urban Pulse", url: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1000&q=80" },
+            { title: "Forest Canopy", url: "https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1000&q=80" },
+            { title: "Golden Hour", url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80" },
+            { title: "The Lone Tree", url: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1000&q=80" }
+        ];
+
+        // --- 2. RENDER GALLERY ---
+        const galleryGrid = document.getElementById('galleryGrid');
+
+        photos.forEach((photo, index) => {
+            const card = document.createElement('div');
+            card.className = 'photo-card';
+            // Click triggers the lightbox
+            card.onclick = () => openLightbox(index);
+            
+            card.innerHTML = `
+                <img src="${photo.url}" alt="${photo.title}">
+                <div class="photo-overlay">
+                    <span class="photo-title">${photo.title}</span>
+                </div>
+            `;
+            galleryGrid.appendChild(card);
+        });
+
+        // --- 3. LIGHTBOX LOGIC ---
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightboxImg');
+        const lightboxCaption = document.getElementById('lightboxCaption');
+
+        function openLightbox(index) {
+            lightboxImg.src = photos[index].url;
+            lightboxCaption.innerText = photos[index].title;
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closeLightbox(e) {
+            // Close if clicking the background OR the close button
+            if (e.target === lightbox || e.target.id === 'closeBtn') {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = 'auto'; // Restore scrolling
+            }
+        }
+
+        // Add keyboard support (Esc to close)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // --- 4. CURSOR LOGIC (Using Event Delegation) ---
+        const cursor = document.getElementById('cursor');
+        
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        document.addEventListener('mouseover', (e) => {
+            // Hover effect triggers on photo cards and the close button
+            if (e.target.closest('.photo-card, .close-btn')) {
+                cursor.classList.add('hovered');
+            }
+        });
+
+        document.addEventListener('mouseout', (e) => {
+            if (e.target.closest('.photo-card, .close-btn')) {
+                cursor.classList.remove('hovered');
+            }
+        });
+    </script>
+</body>
+</html>
