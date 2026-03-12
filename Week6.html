@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WANDERLUST | The Explorer's Trial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Manrope:wght@300;500;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- 1. CSS VARIABLES & RESET --- */
+        :root {
+            --dark: #0a0a0a;
+            --darker: #050505;
+            --gold: #d4af37;
+            --white: #f0f0f0;
+            --ease: cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+
+        body {
+            background-color: var(--dark);
+            color: var(--white);
+            font-family: 'Manrope', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* --- 2. CUSTOM MAGNETIC CURSOR --- */
+        .cursor {
+            width: 20px; height: 20px;
+            border: 1px solid var(--white);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, background-color 0.3s;
+            mix-blend-mode: difference;
+        }
+        .cursor.hovered { background-color: var(--white); width: 50px; height: 50px; opacity: 0.5; border: none; }
+
+        /* --- 3. HERO SECTION --- */
+        .hero {
+            height: 70vh; /* Slightly shorter hero for the quiz page */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=1920&q=80') no-repeat center/cover;
+            filter: brightness(0.4);
+            transform: scale(1.1);
+            animation: breathe 20s infinite alternate;
+        }
+
+        @keyframes breathe { to { transform: scale(1.2); } }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            mix-blend-mode: overlay;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 6vw;
+            line-height: 1;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            opacity: 0;
+            transform: translateY(50px);
+            animation: fadeUp 1.5s var(--ease) forwards 0.5s;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            opacity: 0;
+            animation: fadeUp 1.5s var(--ease) forwards 1s;
+            margin-top: 1rem;
+        }
+
+        /* --- 4. SCROLL PROGRESS BAR --- */
+        .progress-bar {
+            position: fixed;
+            top: 0; left: 0; height: 4px;
+            background: var(--gold);
+            width: 0%;
+            z-index: 1000;
+        }
+
+        /* --- 5. QUIZ SECTION --- */
+        .quiz-section {
+            padding: 10vh 5vw;
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .question-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            border-radius: 12px;
+            margin-bottom: 3rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .question-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: var(--gold);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .option-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--white);
+            padding: 1.2rem 2rem;
+            text-align: left;
+            font-family: 'Manrope', sans-serif;
+            font-size: 1.1rem;
+            border-radius: 6px;
+            transition: all 0.3s var(--ease);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-btn:hover {
+            border-color: var(--gold);
+            background: rgba(212, 175, 55, 0.1);
+            padding-left: 2.5rem;
+        }
+
+        .option-btn.selected {
+            background: var(--gold);
+            color: var(--dark);
+            border-color: var(--gold);
+            font-weight: 800;
+        }
+
+        .submit-container {
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .submit-btn {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 1.2rem 3rem;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            transition: all 0.4s var(--ease);
+        }
+
+        .submit-btn:hover {
+            background: var(--gold);
+            color: var(--dark);
+        }
+
+        /* Scroll Reveal Classes */
+        .hidden { opacity: 0; transform: translateY(50px); transition: all 1s var(--ease); }
+        .show { opacity: 1; transform: translateY(0); }
+
+        /* --- 6. FULLSCREEN MODAL (RESULTS) --- */
+        .story-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--dark);
+            z-index: 2000;
+            transform: translateY(100%);
+            transition: transform 0.8s var(--ease);
+            overflow-y: auto;
+            display: flex; flex-direction: column;
+        }
+        
+        .story-modal.active { transform: translateY(0); }
+
+        .modal-hero {
+            height: 50vh;
+            width: 100%;
+            background-size: cover; background-position: center;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 30px; right: 30px;
+            font-size: 2rem; color: white;
+            z-index: 2001;
+            mix-blend-mode: difference;
+        }
+
+        .modal-content {
+            padding: 4rem 10vw;
+            text-align: center;
+            max-width: 900px; margin: 0 auto;
+        }
+
+        .modal-content h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem; color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .modal-content p {
+            font-size: 1.2rem; line-height: 1.8;
+            opacity: 0.8;
+        }
+
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+        footer {
+            padding: 4rem; text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-family: 'Playfair Display', serif; color: #555;
+        }
+
+        @media (min-width: 768px) {
+            .options-grid { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cursor" id="cursor"></div>
+    <div class="progress-bar" id="progressBar"></div>
+
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <h1>The Explorer's Trial</h1>
+            <div class="subtitle">Test your knowledge of the world</div>
+        </div>
+    </section>
+
+    <section class="quiz-section" id="quizContainer">
+        </section>
+
+    <div class="submit-container hidden" id="submitContainer">
+        <button class="submit-btn" onclick="calculateScore()">Reveal Destiny</button>
+    </div>
+
+    <footer>
+        <p>Designed for the Explorers.</p>
+    </footer>
+
+    <div class="story-modal" id="modal">
+        <div class="close-modal" onclick="closeModal()">✕</div>
+        <div class="modal-hero" id="modalHero"></div>
+        <div class="modal-content">
+            <h2 id="modalTitle">Score</h2>
+            <div id="modalBody">Your cinematic assessment awaits.</div>
+        </div>
+    </div>
+
+    <script>
+        // --- QUIZ DATA ---
+        const quizData = [
+            {
+                question: "Which country has the most islands in the world?",
+                options: ["Philippines", "Canada", "Sweden", "Indonesia"],
+                correct: 3 // Indonesia
+            },
+            {
+                question: "What is the tallest uninterrupted waterfall in the world?",
+                options: ["Niagara Falls", "Angel Falls", "Victoria Falls", "Iguazu Falls"],
+                correct: 1 // Angel Falls
+            },
+            {
+                question: "Which ancient city is famously carved directly into vibrant red sandstone cliff faces?",
+                options: ["Machu Picchu", "Angkor Wat", "Petra", "Chichén Itzá"],
+                correct: 2 // Petra
+            },
+            {
+                question: "Which city is uniquely located across two entirely different continents?",
+                options: ["Istanbul", "Moscow", "Reykjavik", "Cairo"],
+                correct: 0 // Istanbul
+            },
+            {
+                question: "What is the largest desert on Earth?",
+                options: ["The Sahara", "The Arabian Desert", "The Gobi Desert", "Antarctica"],
+                correct: 3 // Antarctica
+            }
+        ];
+
+        let userAnswers = new Array(quizData.length).fill(null);
+
+        // --- RENDER QUIZ ---
+        const quizContainer = document.getElementById('quizContainer');
+
+        function renderQuiz() {
+            quizData.forEach((item, qIndex) => {
+                const card = document.createElement('div');
+                card.className = 'question-card hidden';
+                
+                let optionsHtml = '';
+                item.options.forEach((opt, oIndex) => {
+                    optionsHtml += `<button class="option-btn" onclick="selectOption(${qIndex}, ${oIndex}, this)">${opt}</button>`;
+                });
+
+                card.innerHTML = `
+                    <h3>${qIndex + 1}. ${item.question}</h3>
+                    <div class="options-grid" id="qGrid-${qIndex}">
+                        ${optionsHtml}
+                    </div>
+                `;
+                quizContainer.appendChild(card);
+            });
+
+            // Re-apply hover listeners for the custom cursor on the new buttons
+            applyCursorListeners();
+        }
+
+        // --- HANDLE SELECTION ---
+        function selectOption(qIndex, oIndex, btnElement) {
+            userAnswers[qIndex] = oIndex;
+
+            // Remove 'selected' class from all options in this specific question
+            const grid = document.getElementById(`qGrid-${qIndex}`);
+            const buttons = grid.getElementsByClassName('option-btn');
+            for (let btn of buttons) {
+                btn.classList.remove('selected');
+            }
+
+            // Add 'selected' class to the clicked button
+            btnElement.classList.add('selected');
+
+            // Show submit button if all questions are answered
+            if (!userAnswers.includes(null)) {
+                document.getElementById('submitContainer').classList.remove('hidden');
+                document.getElementById('submitContainer').classList.add('show');
+            }
+        }
+
+        // --- CALCULATE SCORE & SHOW MODAL ---
+        function calculateScore() {
+            let score = 0;
+            userAnswers.forEach((ans, index) => {
+                if (ans === quizData[index].correct) score++;
+            });
+
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            const modalHero = document.getElementById('modalHero');
+
+            modalTitle.innerText = `${score} / ${quizData.length}`;
+
+            // Dynamic cinematic messages based on score
+            if (score === 5) {
+                modalHero.style.backgroundImage = "url('https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=1920&q=80')"; // Mountain peak
+                modalBody.innerHTML = "<p>A True Explorer. You know the corners of this earth like the back of your hand. The world is yours to conquer.</p>";
+            } else if (score >= 3) {
+                modalHero.style.backgroundImage = "url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80')"; // Journey road
+                modalBody.innerHTML = "<p>A Seasoned Traveler. You have seen much, but there are still mysteries out there waiting for you.</p>";
+            } else {
+                modalHero.style.backgroundImage = "url('https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&w=1920&q=80')"; // Foggy forest
+                modalBody.innerHTML = "<p>The Journey Begins. The map is still blank, waiting for you to write your own stories upon it.</p>";
+            }
+
+            document.getElementById('modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            // Scroll back to top to let them review
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- CURSOR LOGIC ---
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        function applyCursorListeners() {
+            document.querySelectorAll('a, button, .close-modal').forEach(el => {
+                // Remove old listeners to prevent duplicates if called multiple times
+                el.replaceWith(el.cloneNode(true)); 
+            });
+            // Re-select and add fresh listeners
+            document.querySelectorAll('a, button, .close-modal, .option-btn').forEach(el => {
+                el.addEventListener('mouseenter', () => cursor.classList.add('hovered'));
+                el.addEventListener('mouseleave', () => cursor.classList.remove('hovered'));
+            });
+        }
+
+        // --- SCROLL REVEAL ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('show');
+            });
+        });
+
+        // --- PROGRESS BAR ---
+        window.onscroll = function() {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let scrolled = (winScroll / height) * 100;
+            document.getElementById("progressBar").style.width = scrolled + "%";
+        };
+
+        // --- INITIALIZATION ---
+        renderQuiz();
+        // Observe all newly rendered hidden elements
+        document.querySelectorAll('.hidden').forEach((el) => observer.observe(el));
+        applyCursorListeners();
+
+    </script>
+</body>
+</html>
