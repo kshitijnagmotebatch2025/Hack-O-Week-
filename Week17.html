@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS BANK | Circular Queue ATM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-page: #f1f5f9; /* Slate 100 */
+            --surface: #ffffff;
+            --brand: #0f172a; /* Slate 900 */
+            --accent: #2563eb; /* Blue 600 */
+            --success: #16a34a; /* Green 600 */
+            --danger: #dc2626; /* Red 600 */
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--brand);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        .glass-card {
+            background: var(--surface);
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            border: 1px solid #e2e8f0;
+        }
+
+        /* --- Circular Ring Visualization --- */
+        .ring-container {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin: 2rem auto;
+            border-radius: 50%;
+            border: 4px dashed #cbd5e1; /* The "Track" */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Central ATM Icon */
+        .atm-center {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: var(--bg-page);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        .queue-slot {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            margin-top: -30px; /* offset half height */
+            margin-left: -30px; /* offset half width */
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            background: white;
+            border: 2px solid #e2e8f0;
+            color: #94a3b8;
+            z-index: 20;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .slot-occupied {
+            background: var(--brand);
+            color: white;
+            border-color: var(--brand);
+            transform: scale(1.1);
+        }
+
+        /* Front/Rear Pointer Badges */
+        .pointer-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: white;
+            z-index: 30;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .badge-front { background-color: var(--success); }
+        .badge-rear { background-color: var(--accent); left: -10px; right: auto; }
+
+        /* Smooth buttons */
+        button { transition: all 0.2s; }
+        button:active { transform: scale(0.96); }
+
+        #alertBox { transition: all 0.3s; opacity: 0; transform: translateY(-10px); }
+        #alertBox.show { opacity: 1; transform: translateY(0); }
+
+    </style>
+</head>
+<body class="p-4 md:p-8 min-h-screen flex flex-col">
+
+    <header class="max-w-6xl mx-auto w-full mb-8 flex justify-between items-end border-b border-slate-200 pb-4">
+        <div>
+            <h1 class="text-3xl font-bold tracking-tight text-slate-900">Nexus Bank</h1>
+            <p class="text-sm text-slate-500 font-medium mt-1">ATM Circular Queue Service Model</p>
+        </div>
+        <div class="text-right">
+            <div class="text-xs font-bold uppercase tracking-widest text-slate-400">Total Capacity</div>
+            <div class="text-2xl font-mono font-bold">8 Slots</div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1">
+        
+        <div class="lg:col-span-5 flex flex-col gap-6">
+            
+            <div class="glass-card p-6 border-t-4 border-t-blue-600">
+                <h2 class="text-lg font-bold mb-6 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                    Service Controls
+                </h2>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <button onclick="enqueue()" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 px-4 rounded-xl shadow-md flex flex-col items-center gap-1">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                        <span>Enqueue</span>
+                        <span class="text-[10px] font-mono font-normal opacity-70">Add Customer</span>
+                    </button>
+                    
+                    <button onclick="dequeue()" class="bg-white hover:bg-slate-50 border-2 border-slate-200 text-slate-800 font-semibold py-3 px-4 rounded-xl shadow-sm flex flex-col items-center gap-1">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Dequeue</span>
+                        <span class="text-[10px] font-mono font-normal text-slate-500">Serve Customer</span>
+                    </button>
+                </div>
+
+                <div id="alertBox" class="rounded-lg p-3 text-sm font-semibold flex items-center justify-center gap-2 pointer-events-none"></div>
+            </div>
+
+            <div class="glass-card flex-1 flex flex-col min-h-[250px] p-6">
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Transaction Log</h3>
+                <div id="transactionLog" class="flex-1 overflow-y-auto space-y-2 pr-2 font-mono text-sm">
+                    <div class="text-slate-400 italic text-xs">System initialized. Waiting for customers.</div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="lg:col-span-7 glass-card p-6 flex flex-col items-center justify-center relative overflow-hidden bg-white/50">
+            
+            <div class="w-full flex justify-between items-center mb-4 px-4 absolute top-6">
+                <div class="flex gap-4">
+                    <div class="flex items-center gap-2 text-xs font-bold text-slate-600"><div class="w-3 h-3 rounded-full bg-green-600"></div> Front (F)</div>
+                    <div class="flex items-center gap-2 text-xs font-bold text-slate-600"><div class="w-3 h-3 rounded-full bg-blue-600"></div> Rear (R)</div>
+                </div>
+                <div class="font-mono font-bold text-sm bg-slate-100 px-3 py-1 rounded-md border border-slate-200">
+                    Size: <span id="sizeDisplay" class="text-blue-600">0</span>/8
+                </div>
+            </div>
+
+            <div class="ring-container" id="ringContainer">
+                <div class="atm-center">
+                    <svg class="w-10 h-10 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                </div>
+                </div>
+
+            <div class="mt-8 text-center max-w-md">
+                <p class="text-sm text-slate-500 bg-slate-100 p-3 rounded-lg font-mono">
+                    Formula: <span class="text-slate-800 font-bold">next_rear = (rear + 1) % capacity</span><br>
+                    This prevents array-out-of-bounds errors by mathematically looping back to index 0.
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- 1. CIRCULAR QUEUE IMPLEMENTATION ---
+        
+        const CAPACITY = 8;
+        const queue = new Array(CAPACITY).fill(null);
+        let front = -1;
+        let rear = -1;
+        let customerIdCounter = 100; // E.g., C-101, C-102
+
+        function isFull() {
+            // Full if front is immediately ahead of rear (wrapped around), OR if rear is at end and front is at 0
+            return (front === 0 && rear === CAPACITY - 1) || (front === rear + 1);
+        }
+
+        function isEmpty() {
+            return front === -1;
+        }
+
+        function enqueue() {
+            if (isFull()) {
+                showAlert("Peak Hours: Queue is FULL! (Overflow)", "danger");
+                logTransaction("Failed Enqueue: Queue Full", "error");
+                return;
+            }
+
+            // If empty, initialize front
+            if (front === -1) {
+                front = 0;
+            }
+
+            // Circular increment of rear
+            rear = (rear + 1) % CAPACITY;
+            
+            const customer = `C-${++customerIdCounter}`;
+            queue[rear] = customer;
+            
+            showAlert(`Customer ${customer} joined the queue.`, "success");
+            logTransaction(`Enqueued ${customer} at index [${rear}]`, "add");
+            updateUI();
+        }
+
+        function dequeue() {
+            if (isEmpty()) {
+                showAlert("Queue is EMPTY! No one to serve. (Underflow)", "danger");
+                logTransaction("Failed Dequeue: Queue Empty", "error");
+                return;
+            }
+
+            const servedCustomer = queue[front];
+            queue[front] = null; // Clear slot
+
+            // If there was only one element, reset queue to empty state
+            if (front === rear) {
+                front = -1;
+                rear = -1;
+            } else {
+                // Circular increment of front
+                front = (front + 1) % CAPACITY;
+            }
+
+            showAlert(`Served customer ${servedCustomer}.`, "info");
+            logTransaction(`Dequeued ${servedCustomer}. Front moved to [${front === -1 ? 'None' : front}]`, "serve");
+            updateUI();
+        }
+
+        // --- 2. UI VISUALIZATION LOGIC ---
+
+        function updateUI() {
+            // Calculate current size for display
+            let currentSize = 0;
+            if (!isEmpty()) {
+                if (rear >= front) {
+                    currentSize = rear - front + 1;
+                } else {
+                    currentSize = (CAPACITY - front) + (rear + 1);
+                }
+            }
+            document.getElementById('sizeDisplay').innerText = currentSize;
+
+            renderRing();
+        }
+
+        function renderRing() {
+            const container = document.getElementById('ringContainer');
+            // Keep the center ATM icon, remove existing slots
+            container.innerHTML = `<div class="atm-center"><svg class="w-10 h-10 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg></div>`;
+
+            const radius = 160; // Distance from center
+
+            for (let i = 0; i < CAPACITY; i++) {
+                // Calculate position on the circle using basic trigonometry
+                // Subtract 90 degrees (Math.PI/2) to start slot 0 at the top
+                const angle = (i / CAPACITY) * (2 * Math.PI) - (Math.PI / 2);
+                
+                // + 160 to center the coordinates within the 320x320 container
+                const x = radius * Math.cos(angle) + 160; 
+                const y = radius * Math.sin(angle) + 160;
+
+                const isOccupied = queue[i] !== null;
+                const isFront = (i === front);
+                const isRear = (i === rear);
+
+                let badges = '';
+                if (isFront) badges += `<div class="pointer-badge badge-front">F</div>`;
+                if (isRear) badges += `<div class="pointer-badge badge-rear">R</div>`;
+
+                container.innerHTML += `
+                    <div class="queue-slot ${isOccupied ? 'slot-occupied' : ''}" style="left: ${x}px; top: ${y}px;">
+                        ${badges}
+                        <div class="text-[10px] opacity-50 mb-1 leading-none">[${i}]</div>
+                        <div class="leading-none">${isOccupied ? queue[i] : '---'}</div>
+                    </div>
+                `;
+            }
+        }
+
+        function showAlert(msg, type) {
+            const box = document.getElementById('alertBox');
+            box.innerText = msg;
+            
+            // Reset classes
+            box.className = "rounded-lg p-3 text-sm font-semibold flex items-center justify-center gap-2 pointer-events-none show";
+            
+            if (type === "danger") {
+                box.classList.add("bg-red-100", "text-red-700", "border", "border-red-200");
+            } else if (type === "success") {
+                box.classList.add("bg-green-100", "text-green-700", "border", "border-green-200");
+            } else {
+                box.classList.add("bg-blue-100", "text-blue-700", "border", "border-blue-200");
+            }
+
+            // Remove after 2.5 seconds
+            clearTimeout(window.alertTimeout);
+            window.alertTimeout = setTimeout(() => {
+                box.classList.remove("show");
+            }, 2500);
+        }
+
+        function logTransaction(msg, type) {
+            const log = document.getElementById('transactionLog');
+            
+            // Remove initial placeholder if present
+            if (log.innerHTML.includes("System initialized")) {
+                log.innerHTML = '';
+            }
+
+            let colorClass = "text-slate-600";
+            if (type === "error") colorClass = "text-red-500 font-bold";
+            if (type === "serve") colorClass = "text-green-600";
+            if (type === "add") colorClass = "text-slate-900";
+
+            const time = new Date().toLocaleTimeString([], { hour12: false });
+            
+            log.insertAdjacentHTML('afterbegin', `
+                <div class="flex gap-3 py-1 border-b border-slate-100">
+                    <span class="text-slate-400">[${time}]</span>
+                    <span class="${colorClass}">${msg}</span>
+                </div>
+            `);
+        }
+
+        // Initialize empty ring on load
+        renderRing();
+
+    </script>
+</body>
+</html>

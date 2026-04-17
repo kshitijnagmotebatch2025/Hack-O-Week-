@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHRONOS | Undo/Redo Task Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #fafaf9; /* Stone 50 */
+            --surface: #ffffff;
+            --accent: #6366f1; /* Indigo 500 */
+            --accent-hover: #4f46e5; /* Indigo 600 */
+            --text-main: #1c1917; /* Stone 900 */
+            --text-muted: #78716c; /* Stone 500 */
+            --border-color: #e7e5e4; /* Stone 200 */
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        .glass-card {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        /* Custom Scrollbar for Stacks */
+        .stack-container::-webkit-scrollbar { width: 6px; }
+        .stack-container::-webkit-scrollbar-track { background: transparent; }
+        .stack-container::-webkit-scrollbar-thumb { background: #d6d3d1; border-radius: 10px; }
+
+        .task-item {
+            transition: all 0.3s ease;
+            animation: slideIn 0.3s ease forwards;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Stack Node Animation */
+        .stack-node {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.9) translateY(-10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .btn-action {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .btn-action:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #f5f5f4;
+            color: #a8a29e;
+            border-color: #e7e5e4;
+        }
+
+        .action-add { border-left: 4px solid #10b981; } /* Emerald */
+        .action-delete { border-left: 4px solid #ef4444; } /* Red */
+        .action-toggle { border-left: 4px solid #f59e0b; } /* Amber */
+
+    </style>
+</head>
+<body class="p-4 md:p-8 min-h-screen flex flex-col h-screen">
+
+    <header class="flex justify-between items-center mb-8 pb-6 border-b border-stone-200 shrink-0">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-indigo-600">Chronos</h1>
+            <p class="text-sm font-medium text-stone-500">LIFO Stack Action Tracker</p>
+        </div>
+        
+        <div class="flex gap-3">
+            <button id="btnUndo" onclick="undo()" class="btn-action bg-white border border-stone-200 text-stone-700 hover:bg-stone-50 shadow-sm" disabled>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+                Undo (Pop)
+            </button>
+            <button id="btnRedo" onclick="redo()" class="btn-action bg-white border border-stone-200 text-stone-700 hover:bg-stone-50 shadow-sm" disabled>
+                Redo (Push)
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10h-10a8 8 0 00-8 8v2M21 10l-6 6m6-6l-6-6"></path></svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1 min-h-0">
+        
+        <section class="glass-card flex flex-col p-6 overflow-hidden">
+            <h2 class="text-lg font-bold mb-4">Task List</h2>
+            
+            <div class="flex gap-2 mb-6">
+                <input type="text" id="taskInput" placeholder="What needs to be done?" class="flex-1 bg-stone-50 border border-stone-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all">
+                <button onclick="addTask()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 rounded-lg transition-colors shadow-sm">Add</button>
+            </div>
+
+            <div id="taskList" class="flex-1 overflow-y-auto space-y-3 pr-2 stack-container">
+                </div>
+        </section>
+
+        <section class="glass-card flex flex-col p-6 overflow-hidden bg-stone-50/50">
+            <h2 class="text-lg font-bold mb-2">Memory Stacks</h2>
+            <p class="text-xs text-stone-500 mb-6 font-mono">// Visualizing the Undo and Redo arrays</p>
+            
+            <div class="flex-1 grid grid-cols-2 gap-6 min-h-0">
+                
+                <div class="flex flex-col bg-white border border-stone-200 rounded-lg overflow-hidden shadow-sm">
+                    <div class="bg-stone-100 border-b border-stone-200 p-3 text-center">
+                        <h3 class="font-bold text-sm text-stone-700">Undo Stack</h3>
+                        <div class="text-[10px] text-stone-500 font-mono uppercase mt-1" id="undoCount">Top ↑</div>
+                    </div>
+                    <div id="undoVisualizer" class="flex-1 overflow-y-auto stack-container p-4 flex flex-col-reverse gap-2 bg-stone-50/30">
+                        </div>
+                </div>
+
+                <div class="flex flex-col bg-white border border-stone-200 rounded-lg overflow-hidden shadow-sm">
+                    <div class="bg-stone-100 border-b border-stone-200 p-3 text-center">
+                        <h3 class="font-bold text-sm text-stone-700">Redo Stack</h3>
+                        <div class="text-[10px] text-stone-500 font-mono uppercase mt-1" id="redoCount">Top ↑</div>
+                    </div>
+                    <div id="redoVisualizer" class="flex-1 overflow-y-auto stack-container p-4 flex flex-col-reverse gap-2 bg-stone-50/30">
+                        </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- 1. STATE & DATA STRUCTURES ---
+        let tasks = [];
+        
+        // The two core stacks required by the prompt
+        let undoStack = [];
+        let redoStack = [];
+
+        // Action Types enum
+        const ACTION = { ADD: 'ADD', DELETE: 'DELETE', TOGGLE: 'TOGGLE' };
+
+        // --- 2. CORE TASK FUNCTIONS ---
+
+        function addTask() {
+            const input = document.getElementById('taskInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const newTask = { id: Date.now(), text: text, completed: false };
+            
+            // Execute Action
+            tasks.push(newTask);
+            
+            // Record Action for Undo
+            recordAction(ACTION.ADD, newTask, tasks.length - 1);
+            
+            input.value = '';
+            renderAll();
+        }
+
+        function deleteTask(id) {
+            const index = tasks.findIndex(t => t.id === id);
+            if (index === -1) return;
+
+            const taskToDelete = tasks[index];
+            
+            // Execute Action
+            tasks.splice(index, 1);
+            
+            // Record Action
+            recordAction(ACTION.DELETE, taskToDelete, index);
+            
+            renderAll();
+        }
+
+        function toggleTask(id) {
+            const index = tasks.findIndex(t => t.id === id);
+            if (index === -1) return;
+
+            // Execute Action
+            tasks[index].completed = !tasks[index].completed;
+            
+            // Record Action
+            recordAction(ACTION.TOGGLE, tasks[index], index);
+            
+            renderAll();
+        }
+
+        // --- 3. STACK LOGIC (UNDO / REDO) ---
+
+        function recordAction(type, taskData, index) {
+            // Push the inverse data to the Undo stack
+            undoStack.push({ type, task: { ...taskData }, index });
+            
+            // CRITICAL: Any new user action clears the redo stack!
+            redoStack = []; 
+        }
+
+        function undo() {
+            if (undoStack.length === 0) return;
+
+            // 1. Pop from Undo Stack
+            const action = undoStack.pop();
+
+            // 2. Push to Redo Stack
+            redoStack.push(action);
+
+            // 3. Reverse the action
+            switch (action.type) {
+                case ACTION.ADD:
+                    // Reverse of Add is Delete
+                    tasks.splice(action.index, 1);
+                    break;
+                case ACTION.DELETE:
+                    // Reverse of Delete is Add (re-insert at exact index)
+                    tasks.splice(action.index, 0, action.task);
+                    break;
+                case ACTION.TOGGLE:
+                    // Reverse of Toggle is Toggle
+                    tasks[action.index].completed = !tasks[action.index].completed;
+                    break;
+            }
+
+            renderAll();
+        }
+
+        function redo() {
+            if (redoStack.length === 0) return;
+
+            // 1. Pop from Redo Stack
+            const action = redoStack.pop();
+
+            // 2. Push back to Undo Stack
+            undoStack.push(action);
+
+            // 3. Re-apply the action
+            switch (action.type) {
+                case ACTION.ADD:
+                    tasks.splice(action.index, 0, action.task);
+                    break;
+                case ACTION.DELETE:
+                    tasks.splice(action.index, 1);
+                    break;
+                case ACTION.TOGGLE:
+                    tasks[action.index].completed = !tasks[action.index].completed;
+                    break;
+            }
+
+            renderAll();
+        }
+
+        // --- 4. UI RENDERING LOGIC ---
+
+        function renderAll() {
+            renderTasks();
+            renderStacks();
+            updateButtons();
+        }
+
+        function renderTasks() {
+            const list = document.getElementById('taskList');
+            list.innerHTML = '';
+
+            if (tasks.length === 0) {
+                list.innerHTML = `<div class="text-center text-stone-400 italic text-sm py-8">No tasks active.</div>`;
+                return;
+            }
+
+            tasks.forEach(task => {
+                const isDone = task.completed;
+                list.innerHTML += `
+                    <div class="task-item flex items-center justify-between p-4 bg-white border border-stone-200 rounded-lg shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" class="w-5 h-5 accent-indigo-600 cursor-pointer" ${isDone ? 'checked' : ''} onclick="toggleTask(${task.id})">
+                            <span class="${isDone ? 'line-through text-stone-400' : 'text-stone-800 font-medium'}">${task.text}</span>
+                        </div>
+                        <button onclick="deleteTask(${task.id})" class="text-stone-400 hover:text-red-500 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function renderStacks() {
+            const undoVis = document.getElementById('undoVisualizer');
+            const redoVis = document.getElementById('redoVisualizer');
+            
+            document.getElementById('undoCount').innerText = `Size: ${undoStack.length} | Top ↑`;
+            document.getElementById('redoCount').innerText = `Size: ${redoStack.length} | Top ↑`;
+
+            // Helper to generate HTML for stack nodes
+            const buildNodeHTML = (action) => {
+                let colorClass = '';
+                let verb = '';
+                if(action.type === ACTION.ADD) { colorClass = 'action-add'; verb = 'Added'; }
+                if(action.type === ACTION.DELETE) { colorClass = 'action-delete'; verb = 'Deleted'; }
+                if(action.type === ACTION.TOGGLE) { colorClass = 'action-toggle'; verb = 'Toggled'; }
+
+                // Trim text for visualizer
+                let shortText = action.task.text.length > 15 ? action.task.text.substring(0,15) + '...' : action.task.text;
+
+                return `
+                    <div class="stack-node bg-white border border-stone-200 p-3 rounded shadow-sm flex flex-col gap-1 ${colorClass}">
+                        <span class="text-[10px] font-mono text-stone-500 font-bold tracking-wider">${action.type}</span>
+                        <span class="text-xs text-stone-800 font-medium">"${shortText}"</span>
+                    </div>
+                `;
+            };
+
+            // Render Undo (HTML flex-col-reverse makes the end of the array appear at the top)
+            undoVis.innerHTML = undoStack.length === 0 
+                ? `<div class="text-center text-stone-400 italic text-xs my-auto">Stack Empty</div>` 
+                : undoStack.map(buildNodeHTML).join('');
+
+            // Render Redo
+            redoVis.innerHTML = redoStack.length === 0 
+                ? `<div class="text-center text-stone-400 italic text-xs my-auto">Stack Empty</div>` 
+                : redoStack.map(buildNodeHTML).join('');
+        }
+
+        function updateButtons() {
+            document.getElementById('btnUndo').disabled = undoStack.length === 0;
+            document.getElementById('btnRedo').disabled = redoStack.length === 0;
+        }
+
+        // Allow 'Enter' key to add task
+        document.getElementById('taskInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') addTask();
+        });
+
+        // Init
+        renderAll();
+
+    </script>
+</body>
+</html>
